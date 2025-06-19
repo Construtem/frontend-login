@@ -1,9 +1,10 @@
 # Frontend - Login
 
-Este repositorio contiene el frontend del login del sistema Construtem.
-Al logearse correctamente, el sistema dirigirá al trabajador a su respectivo servicio: 
-- inventario.tssw.cl
-- ventas.tssw.cl
+- Este repositorio contiene el frontend del login del sistema Construtem.
+- Este microservicio será desplegado en la siguiente URL: https://login.tssw.cl
+- Al logearse correctamente, el sistema dirigirá al trabajador a su respectivo servicio: 
+  - inventario.tssw.cl
+  - ventas.tssw.cl
 
 ## 🛠️ Tecnologías
 - Next.js
