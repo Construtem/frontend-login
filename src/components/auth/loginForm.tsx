@@ -168,17 +168,15 @@ const Login = () => {
           </button>
 
           {googleError && (
-            <p
+            <div
               style={{
-                ...styles.fadeOutMessage,
-                ...(fadeOut ? styles.hiddenMessage : {}),
-                color: "red",
-                marginTop: "10px",
-                textAlign: "center",
+                ...styles.errorMessageBox,
+                opacity: fadeOut ? 0 : 1,
               }}
             >
-              {googleError}
-            </p>
+              <span style={styles.errorIcon}>❌</span>
+              <span style={styles.errorText}>{googleError}</span>
+            </div>
           )}
         </div>
 
@@ -306,6 +304,30 @@ const styles: { [key: string]: React.CSSProperties } = {
     marginRight: "8px",
   },
   successText: {
+    fontSize: "16px",
+  },
+  errorMessageBox: {
+    position: "absolute",
+    top: "20px",
+    right: "20px",
+    backgroundColor: "#fdecea",          // fondo rojo claro
+    border: "1px solid #f44336",         // borde rojo intenso
+    color: "#b71c1c",                    // texto rojo oscuro
+    padding: "12px 20px",
+    borderRadius: "8px",
+    boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+    display: "flex",
+    alignItems: "center",
+    fontSize: "16px",
+    fontWeight: 500,
+    fontFamily: '"Montserrat", sans-serif',
+    transition: "opacity 0.8s ease-in-out",
+  },
+  errorIcon: {
+    fontSize: "20px",
+    marginRight: "8px",
+  },
+  errorText: {
     fontSize: "16px",
   },
 };
