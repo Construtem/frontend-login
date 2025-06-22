@@ -1,3 +1,5 @@
+# Este archivo define el Deployment para el microservicio de login en producción.
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
