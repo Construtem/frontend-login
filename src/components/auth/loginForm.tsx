@@ -7,30 +7,36 @@ import { signInWithPopup } from "firebase/auth";
 import { auth, provider } from "../../../firebase";
 import logo from "@/styles/images/logo_barra_superior.png";
 import google_sign_in from "@/styles/images/logo_google.png";
+import Swal from "sweetalert2";
 
 const allowedEmail = "jriquelme@utem.cl";
 
 const Login = () => {
   const [googleError, setGoogleError] = useState("");
-  const [loading, setLoading] = useState(false); // para mostrar loadingLogin después de login
-  const [fadeOut, setFadeOut] = useState(false);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleGoogleLogin = async () => {
     setGoogleError("");
-    setFadeOut(false);
+    setLoading(true);
 
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
       if (!user.email) {
-        setGoogleError("No se pudo obtener el correo del usuario.");
+        setTimeout(() => {
+          setLoading(false);
+          setGoogleError("No se pudo obtener el correo del usuario.");
+        }, 1800);
         return;
       }
 
       if (user.email !== allowedEmail) {
-        setGoogleError("Este correo no está registrado como usuario autorizado en el sistema.");
+        setTimeout(() => {
+          setLoading(false);
+          setGoogleError("Este correo no está registrado como usuario autorizado en el sistema.");
+        }, 1800);
         return;
       }
 
@@ -44,68 +50,96 @@ const Login = () => {
         })
       );
 
-      // Aquí activamos el loading para mostrar la pantalla de loadingLogin integrada
-      setLoading(true);
+      setTimeout(() => {
+        Swal.fire({
+          icon: "success",
+          title: "Inicio de sesión exitoso!",
+          showConfirmButton: false,
+          timer: 4800,
+          timerProgressBar: true,
+          background: "#ffffff",
+          color: "#2e7d32",
+          width: "700px",
+          customClass: {
+            popup: "fixed-alert-height",
+          },
+          didOpen: () => {
+            const bar = document.querySelector<HTMLElement>(".swal2-timer-progress-bar");
+            if (bar) bar.style.backgroundColor = "#2e7d32";
+          },
+        });
+
+        setTimeout(() => {
+          router.push("/maintenance");
+        }, 5000);
+      }, 1800);
     } catch (error: unknown) {
-      if (
-        typeof error === "object" &&
-        error !== null &&
-        "code" in error &&
-        typeof (error as { code: string }).code === "string"
-      ) {
-        const code = (error as { code: string }).code;
+      setTimeout(() => {
+        setLoading(false);
 
-        if (code === "auth/popup-closed-by-user") {
-          setGoogleError("El inicio de sesión fue cancelado.");
+        if (
+          typeof error === "object" &&
+          error !== null &&
+          "code" in error &&
+          typeof (error as { code: string }).code === "string"
+        ) {
+          const code = (error as { code: string }).code;
+
+          if (code === "auth/popup-closed-by-user") {
+            setGoogleError("El inicio de sesión fue cancelado.");
+          } else {
+            setGoogleError("Error al iniciar sesión con Google.");
+          }
         } else {
-          setGoogleError("Error al iniciar sesión con Google.");
+          setGoogleError("Ocurrió un error inesperado.");
         }
-      } else {
-        setGoogleError("Ocurrió un error inesperado.");
-      }
-
-      console.error("Error en Google Login:", error);
+      }, 1800);
     }
   };
 
-  // Animación fadeOut y redirección cuando loading es true
-  useEffect(() => {
-    let redirectTimer: ReturnType<typeof setTimeout>;
-    let fadeTimer: ReturnType<typeof setTimeout>;
-
-    if (loading) {
-      fadeTimer = setTimeout(() => setFadeOut(true), 3000);
-      redirectTimer = setTimeout(() => {
-        router.push("/admin/inicio");
-      }, 10000);
-    }
-
-    return () => {
-      clearTimeout(redirectTimer);
-      clearTimeout(fadeTimer);
-    };
-  }, [loading, router]);
-
-  // FadeOut para errores
   useEffect(() => {
     if (googleError) {
-      setFadeOut(false);
-      const fadeTimer = setTimeout(() => setFadeOut(true), 3000);
-      const clearTimer = setTimeout(() => setGoogleError(""), 5000);
-      return () => {
-        clearTimeout(fadeTimer);
-        clearTimeout(clearTimer);
-      };
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: googleError,
+        showConfirmButton: false,
+        timer: 4800,
+        timerProgressBar: true,
+        background: "#ffffff",
+        color: "#b71c1c",
+        width: "700px",
+        customClass: {
+          popup: "fixed-alert-height",
+        },
+        didOpen: () => {
+          const bar = document.querySelector<HTMLElement>(".swal2-timer-progress-bar");
+          if (bar) bar.style.backgroundColor = "#b71c1c";
+        },
+      });
     }
   }, [googleError]);
 
-  // Inyectar CSS para animación spinner
   useEffect(() => {
     const style = document.createElement("style");
     style.innerHTML = `
       @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
+      }
+
+      .fixed-alert-height {
+        height: 368px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .swal2-popup {
+        display: flex !important;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
       }
     `;
     document.head.appendChild(style);
@@ -114,7 +148,6 @@ const Login = () => {
     };
   }, []);
 
-  // Si loading true, mostramos pantalla de carga integrada
   if (loading) {
     return (
       <div style={styles.pageBackground}>
@@ -126,22 +159,10 @@ const Login = () => {
             <Image src={logo} alt="Ferretería UTEM" style={styles.logo} />
           </div>
         </div>
-
-        <div
-          style={{
-            ...styles.successMessageBox,
-            opacity: fadeOut ? 0 : 1,
-            transition: "opacity 0.8s ease-in-out",
-          }}
-        >
-          <span style={styles.successIcon}>✔</span>
-          <span style={styles.successText}>¡Inicio de sesión exitoso!</span>
-        </div>
       </div>
     );
   }
 
-  // Si no loading, mostramos el login form normal
   return (
     <div style={styles.pageBackground}>
       <div style={styles.loginWrapper}>
@@ -164,20 +185,10 @@ const Login = () => {
               width={24}
               height={24}
             />
-            <span style={{ marginLeft: "10px" }}>{loading ? "Autenticando..." : "Continuar con Google"}</span>
+            <span style={{ marginLeft: "10px" }}>
+              {loading ? "Autenticando..." : "Continuar con Google"}
+            </span>
           </button>
-
-          {googleError && (
-            <div
-              style={{
-                ...styles.errorMessageBox,
-                opacity: fadeOut ? 0 : 1,
-              }}
-            >
-              <span style={styles.errorIcon}>❌</span>
-              <span style={styles.errorText}>{googleError}</span>
-            </div>
-          )}
         </div>
 
         <div style={styles.logoBox}>
@@ -205,15 +216,15 @@ const styles: { [key: string]: React.CSSProperties } = {
     boxSizing: "border-box",
   },
   loginWrapper: {
-  display: "flex",
-  flexDirection: "row",
-  backgroundColor: "rgba(255, 255, 255, 0.95)",
-  boxShadow: "0 8px 20px rgba(0, 0, 0, 0.3)",
-  overflow: "hidden",
-  borderRadius: "10px",
-  width: "780px",       // ancho fijo suma de loginBox + logoBox
-  minHeight: "450px",   // altura mínima, ajusta según el contenido
-},
+    display: "flex",
+    flexDirection: "row",
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    boxShadow: "0 8px 20px rgba(0, 0, 0, 0.3)",
+    overflow: "hidden",
+    borderRadius: "10px",
+    width: "780px",
+    minHeight: "450px",
+  },
   loginBox: {
     padding: "40px",
     display: "flex",
@@ -264,71 +275,15 @@ const styles: { [key: string]: React.CSSProperties } = {
     height: "auto",
     width: "auto",
   },
-  fadeOutMessage: {
-    opacity: 1,
-    transition: "opacity 0.8s ease-in-out",
-  },
-  hiddenMessage: {
-    opacity: 0,
-  },
-
-  // Loading styles
   spinner: {
-  width: "48px",
-  height: "48px",
-  border: "6px solid #ccc",
-  borderTop: "6px solid #444",
-  borderRadius: "50%",
-  animation: "spin 1s linear infinite",
-  margin: "0 auto", // <-- esto centra horizontalmente
-  display: "block", // para que margin auto funcione bien en bloque
-  },
-  successMessageBox: {
-    position: "absolute",
-    top: "20px",
-    right: "20px",
-    backgroundColor: "#e6f8e6",
-    border: "1px solid #4caf50",
-    color: "#2e7d32",
-    padding: "12px 20px",
-    borderRadius: "8px",
-    boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
-    display: "flex",
-    alignItems: "center",
-    fontSize: "16px",
-    fontWeight: 500,
-    fontFamily: '"Montserrat", sans-serif',
-  },
-  successIcon: {
-    fontSize: "20px",
-    marginRight: "8px",
-  },
-  successText: {
-    fontSize: "16px",
-  },
-  errorMessageBox: {
-    position: "absolute",
-    top: "20px",
-    right: "20px",
-    backgroundColor: "#fdecea",          // fondo rojo claro
-    border: "1px solid #f44336",         // borde rojo intenso
-    color: "#b71c1c",                    // texto rojo oscuro
-    padding: "12px 20px",
-    borderRadius: "8px",
-    boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
-    display: "flex",
-    alignItems: "center",
-    fontSize: "16px",
-    fontWeight: 500,
-    fontFamily: '"Montserrat", sans-serif',
-    transition: "opacity 0.8s ease-in-out",
-  },
-  errorIcon: {
-    fontSize: "20px",
-    marginRight: "8px",
-  },
-  errorText: {
-    fontSize: "16px",
+    width: "48px",
+    height: "48px",
+    border: "6px solid #ccc",
+    borderTop: "6px solid #444",
+    borderRadius: "50%",
+    animation: "spin 1s linear infinite",
+    margin: "0 auto",
+    display: "block",
   },
 };
 
