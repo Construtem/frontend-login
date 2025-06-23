@@ -12,7 +12,6 @@ import Swal from "sweetalert2";
 const Login = () => {
   const [googleError, setGoogleError] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   const handleGoogleLogin = async () => {
     setGoogleError("");
