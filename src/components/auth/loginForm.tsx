@@ -9,8 +9,6 @@ import logo from "@/styles/images/logo_barra_superior.png";
 import google_sign_in from "@/styles/images/logo_google.png";
 import Swal from "sweetalert2";
 
-const allowedEmail = "jriquelme@utem.cl";
-
 const Login = () => {
   const [googleError, setGoogleError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -23,6 +21,7 @@ const Login = () => {
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
+      const token = await user.getIdToken();
 
       if (!user.email) {
         setTimeout(() => {
@@ -32,12 +31,50 @@ const Login = () => {
         return;
       }
 
-      if (user.email !== allowedEmail) {
+      if (!user.email.endsWith('@utem.cl')) {
         setTimeout(() => {
           setLoading(false);
-          setGoogleError("Este correo no está registrado como usuario autorizado en el sistema.");
+          setGoogleError("Solo se permiten correos institucionales @utem.cl");
         }, 1800);
         return;
+      }
+
+      // Si el correo es válido, se procede a enviar el token al backend
+      if (user.email.endsWith('@utem.cl')) {
+        const response = await fetch(`http://localhost:8080/auth/verify`, {  // OJO cambiar URL al backend real
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        // Verificar si la respuesta es exitosa
+        if (!response.ok) {
+          throw new Error('Error al verificar el token con el backend');
+        }
+
+        // OJO que este rol debe ser creado en la bdd porcia, ahora mismo no funcionará xd
+        // Aqui el backend devuelve el rol del usuario
+        const data = await response.json(); // { rol: 'vendedor' | 'administrador' | ... }
+
+        if (data.rol === 'Vendedor') {
+          Swal.fire({ title: "Bienvenido"});
+          setTimeout(() => {
+            window.location.href = 'https://ventas.tssw.cl';
+          }, 3000);
+          //window.location.href = 'https://ventas.tssw.cl';  Quizas aqui se deba utilizar el Swal.fire para mostrar un mensaje de éxito
+        } else if (data.rol === 'Administrador') {
+          Swal.fire({ title: "Bienvenido"});
+          setTimeout(() => {
+            window.location.href = 'https://inventario.tssw.cl';
+          }, 3000);
+          //window.location.href = 'https://inventario.tssw.cl'; Aqui tambien deberia ir Swal.fire en vez de abajo
+        } else {
+          setGoogleError("Tu rol no tiene acceso autorizado.");
+          setLoading(false);
+          return;
+        }
       }
 
       localStorage.setItem(
@@ -51,7 +88,7 @@ const Login = () => {
       );
 
       setTimeout(() => {
-        Swal.fire({
+        Swal.fire({   //Este deberia ir en (if (data.rol === 'vendedor') { ... } else if (data.rol === 'administrador') { ... })
           icon: "success",
           title: "Inicio de sesión exitoso!",
           showConfirmButton: false,
