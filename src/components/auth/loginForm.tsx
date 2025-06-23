@@ -59,17 +59,56 @@ const Login = () => {
         const data = await response.json(); // { rol: 'vendedor' | 'administrador' | ... }
 
         if (data.rol === 'Vendedor') {
-          Swal.fire({ title: "Bienvenido"});
+
+          Swal.fire({
+            icon: "success",
+            title: `¡Bienvenido, ${user.displayName || "usuario"}!`,
+            text: "Inicio de sesión exitoso como Administrador.",
+            showConfirmButton: false,
+            timer: 5000,
+            timerProgressBar: true,
+            background: "#ffffff",
+            color: "#2e7d32",
+            width: "700px",
+            customClass: {
+              popup: "fixed-alert-height",
+            },
+            didOpen: () => {
+              const bar = document.querySelector<HTMLElement>(
+                ".swal2-timer-progress-bar"
+              );
+              if (bar) bar.style.backgroundColor = "#2e7d32";
+            },
+          });
           setTimeout(() => {
             window.location.href = 'https://ventas.tssw.cl';
           }, 3000);
-          //window.location.href = 'https://ventas.tssw.cl';  Quizas aqui se deba utilizar el Swal.fire para mostrar un mensaje de éxito
         } else if (data.rol === 'Administrador') {
-          Swal.fire({ title: "Bienvenido"});
+          
+          Swal.fire({
+            icon: "success",
+            title: `¡Bienvenido, ${user.displayName || "usuario"}!`,
+            text: "Inicio de sesión exitoso como Administrador.",
+            showConfirmButton: false,
+            timer: 5000,
+            timerProgressBar: true,
+            background: "#ffffff",
+            color: "#2e7d32",
+            width: "700px",
+            customClass: {
+              popup: "fixed-alert-height",
+            },
+            didOpen: () => {
+              const bar = document.querySelector<HTMLElement>(
+                ".swal2-timer-progress-bar"
+              );
+              if (bar) bar.style.backgroundColor = "#2e7d32";
+            },
+          });
+
           setTimeout(() => {
             window.location.href = 'https://inventario.tssw.cl';
           }, 3000);
-          //window.location.href = 'https://inventario.tssw.cl'; Aqui tambien deberia ir Swal.fire en vez de abajo
         } else {
           setGoogleError("Tu rol no tiene acceso autorizado.");
           setLoading(false);
