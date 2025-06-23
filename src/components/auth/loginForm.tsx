@@ -41,7 +41,7 @@ const Login = () => {
 
       // Si el correo es válido, se procede a enviar el token al backend
       if (user.email.endsWith('@utem.cl')) {
-        const response = await fetch(`localhost:8080/auth/verify`, {  // OJO cambiar URL al backend real
+        const response = await fetch(`http://localhost:8080/auth/verify`, {  // OJO cambiar URL al backend real
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -58,10 +58,18 @@ const Login = () => {
         // Aqui el backend devuelve el rol del usuario
         const data = await response.json(); // { rol: 'vendedor' | 'administrador' | ... }
 
-        if (data.rol === 'vendedor') {
-          window.location.href = 'https://ventas.tssw.cl';  //Quizas aqui se deba utilizar el Swal.fire para mostrar un mensaje de éxito
-        } else if (data.rol === 'administrador') {
-          window.location.href = 'https://inventario.tssw.cl';  //Aqui tambien deberia ir Swal.fire en vez de abajo
+        if (data.rol === 'Vendedor') {
+          Swal.fire({ title: "Bienvenido"});
+          setTimeout(() => {
+            window.location.href = 'https://ventas.tssw.cl';
+          }, 3000);
+          //window.location.href = 'https://ventas.tssw.cl';  Quizas aqui se deba utilizar el Swal.fire para mostrar un mensaje de éxito
+        } else if (data.rol === 'Administrador') {
+          Swal.fire({ title: "Bienvenido"});
+          setTimeout(() => {
+            window.location.href = 'https://inventario.tssw.cl';
+          }, 3000);
+          //window.location.href = 'https://inventario.tssw.cl'; Aqui tambien deberia ir Swal.fire en vez de abajo
         } else {
           setGoogleError("Tu rol no tiene acceso autorizado.");
           setLoading(false);
