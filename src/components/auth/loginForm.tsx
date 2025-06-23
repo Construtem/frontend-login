@@ -24,7 +24,7 @@ const Login = () => {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
-      if (!user.email) {
+      if (!user || !user.email) {
         setTimeout(() => {
           setLoading(false);
           setGoogleError("No se pudo obtener el correo del usuario.");
@@ -53,9 +53,10 @@ const Login = () => {
       setTimeout(() => {
         Swal.fire({
           icon: "success",
-          title: "Inicio de sesión exitoso!",
+          title: `¡Bienvenido, ${user.displayName || "usuario"}!`,
+          text: "Inicio de sesión exitoso.",
           showConfirmButton: false,
-          timer: 4800,
+          timer: 5000,
           timerProgressBar: true,
           background: "#ffffff",
           color: "#2e7d32",
@@ -71,11 +72,12 @@ const Login = () => {
 
         setTimeout(() => {
           router.push("/maintenance");
-        }, 5000);
+        }, 5200);
       }, 1800);
     } catch (error: unknown) {
       setTimeout(() => {
         setLoading(false);
+        let message = "Ocurrió un error inesperado al iniciar sesión.";
 
         if (
           typeof error === "object" &&
@@ -85,26 +87,35 @@ const Login = () => {
         ) {
           const code = (error as { code: string }).code;
 
-          if (code === "auth/popup-closed-by-user") {
-            setGoogleError("El inicio de sesión fue cancelado.");
-          } else {
-            setGoogleError("Error al iniciar sesión con Google.");
+          switch (code) {
+            case "auth/popup-closed-by-user":
+              message = "El inicio de sesión fue cancelado por el usuario.";
+              break;
+            case "auth/network-request-failed":
+              message = "Error de red. Verifica tu conexión a internet.";
+              break;
+            case "auth/internal-error":
+              message = "Error interno del servidor de autenticación.";
+              break;
+            default:
+              message = "Error al iniciar sesión con Google.";
           }
-        } else {
-          setGoogleError("Ocurrió un error inesperado.");
         }
+
+        setGoogleError(message);
       }, 1800);
     }
   };
 
+  // Mostrar errores desde googleError
   useEffect(() => {
     if (googleError) {
       Swal.fire({
         icon: "error",
-        title: "Oops...",
-        text: googleError,
+        title: "Error de inicio de sesión",
+        html: `<p style="font-size:16px">${googleError}</p>`,
         showConfirmButton: false,
-        timer: 4800,
+        timer: 5000,
         timerProgressBar: true,
         background: "#ffffff",
         color: "#b71c1c",
@@ -120,6 +131,7 @@ const Login = () => {
     }
   }, [googleError]);
 
+  // Estilos SweetAlert
   useEffect(() => {
     const style = document.createElement("style");
     style.innerHTML = `
@@ -169,7 +181,7 @@ const Login = () => {
         <div style={styles.loginBox}>
           <h2 style={styles.title}>Accede al sistema de gestión</h2>
           <p style={{ fontSize: "16px", textAlign: "center", color: "#444", marginBottom: "20px" }}>
-            Ingresa con tu correo electronico asociado como administrador, vendedor o usuario para acceder a nuestro sistema.
+            Ingresa con tu correo electrónico autorizado como administrador, vendedor o usuario para acceder.
           </p>
 
           <button
