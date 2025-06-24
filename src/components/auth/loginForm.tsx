@@ -41,7 +41,7 @@ const Login = () => {
 
       // Si el correo es válido, se procede a enviar el token al backend
       if (user.email.endsWith('@utem.cl')) {
-        const response = await fetch(`http://localhost:8080/auth/verify`, {  // OJO cambiar URL al backend real
+        const response = await fetch(`https://api-login.tssw.cl/auth/verify`, {  // OJO cambiar URL al backend real
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
