@@ -39,17 +39,81 @@ const Login = () => {
         return;
       }
 
-      // Verificar token en el backend
-      const response = await fetch(`http://localhost:8080/auth/verify`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+      // Si el correo es válido, se procede a enviar el token al backend
+      if (user.email.endsWith('@utem.cl')) {
+        const response = await fetch(`https://api-login.tssw.cl/auth/verify`, {  // OJO cambiar URL al backend real
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
 
-      if (!response.ok) {
-        throw new Error("Error al verificar el token con el backend");
+        // Verificar si la respuesta es exitosa
+        if (!response.ok) {
+          throw new Error('Error al verificar el token con el backend');
+        }
+
+        // OJO que este rol debe ser creado en la bdd porcia, ahora mismo no funcionará xd
+        // Aqui el backend devuelve el rol del usuario
+        const data = await response.json(); // { rol: 'vendedor' | 'administrador' | ... }
+
+        if (data.rol === 'Vendedor') {
+
+          Swal.fire({
+            icon: "success",
+            title: `¡Bienvenido, ${user.displayName || "usuario"}!`,
+            text: "Inicio de sesión exitoso como Administrador.",
+            showConfirmButton: false,
+            timer: 5000,
+            timerProgressBar: true,
+            background: "#ffffff",
+            color: "#2e7d32",
+            width: "700px",
+            customClass: {
+              popup: "fixed-alert-height",
+            },
+            didOpen: () => {
+              const bar = document.querySelector<HTMLElement>(
+                ".swal2-timer-progress-bar"
+              );
+              if (bar) bar.style.backgroundColor = "#2e7d32";
+            },
+          });
+          setTimeout(() => {
+            window.location.href = 'https://ventas.tssw.cl';
+          }, 3000);
+        } else if (data.rol === 'Administrador') {
+          
+          Swal.fire({
+            icon: "success",
+            title: `¡Bienvenido, ${user.displayName || "usuario"}!`,
+            text: "Inicio de sesión exitoso como Administrador.",
+            showConfirmButton: false,
+            timer: 5000,
+            timerProgressBar: true,
+            background: "#ffffff",
+            color: "#2e7d32",
+            width: "700px",
+            customClass: {
+              popup: "fixed-alert-height",
+            },
+            didOpen: () => {
+              const bar = document.querySelector<HTMLElement>(
+                ".swal2-timer-progress-bar"
+              );
+              if (bar) bar.style.backgroundColor = "#2e7d32";
+            },
+          });
+
+          setTimeout(() => {
+            window.location.href = 'https://inventario.tssw.cl';
+          }, 3000);
+        } else {
+          setGoogleError("Tu rol no tiene acceso autorizado.");
+          setLoading(false);
+          return;
+        }
       }
 
       const data = await response.json(); // { rol: 'Vendedor' | 'Administrador' | ... }
