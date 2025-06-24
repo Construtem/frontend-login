@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+//import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { signInWithPopup } from "firebase/auth";
 import { auth, provider } from "../../../firebase";
@@ -12,6 +12,7 @@ import Swal from "sweetalert2";
 const Login = () => {
   const [googleError, setGoogleError] = useState("");
   const [loading, setLoading] = useState(false);
+ // const router = useRouter();
 
   const handleGoogleLogin = async () => {
     setGoogleError("");
