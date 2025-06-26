@@ -29,7 +29,7 @@ const Login = () => {
         return;
       }
 
-      if (!user.email.endsWith("@utem.cl")) {
+      if (!user.email.endsWith('@utem.cl')) {
         setTimeout(() => {
           setLoading(false);
           setGoogleError("Solo se permiten correos institucionales @utem.cl");
@@ -38,7 +38,7 @@ const Login = () => {
       }
 
       // Verificar token en el backend
-      const response = await fetch(`https://api-login.tssw.cl/auth/verify`, {
+      const response = await fetch(`http://localhost:8080/auth/verify`, { // Cambiar a la URL del backend en producción
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -70,10 +70,11 @@ const Login = () => {
           title: `¡Bienvenido, ${user.displayName || "usuario"}!`,
           text: "Inicio de sesión exitoso como Vendedor.",
           showConfirmButton: false,
+          showCloseButton: true, // 👈 Agrega esto
           timer: 5000,
           timerProgressBar: true,
           background: "#ffffff",
-          color: "#2e7d32",
+          color: "#000000",
           width: "700px",
           customClass: {
             popup: "fixed-alert-height",
@@ -82,23 +83,24 @@ const Login = () => {
             const bar = document.querySelector<HTMLElement>(
               ".swal2-timer-progress-bar"
             );
-            if (bar) bar.style.backgroundColor = "#2e7d32";
+            if (bar) bar.style.backgroundColor = "#07e700";
           },
         });
 
         setTimeout(() => {
           window.location.href = "https://ventas.tssw.cl";
-        }, 8000);
+        }, 5500);
       } else if (data.rol === "Administrador") {
         Swal.fire({
           icon: "success",
           title: `¡Bienvenido, ${user.displayName || "usuario"}!`,
           text: "Inicio de sesión exitoso como Administrador.",
           showConfirmButton: false,
+          showCloseButton: true, // 👈 Agrega esto
           timer: 5000,
           timerProgressBar: true,
           background: "#ffffff",
-          color: "#2e7d32",
+          color: "#000000",
           width: "700px",
           customClass: {
             popup: "fixed-alert-height",
@@ -107,13 +109,13 @@ const Login = () => {
             const bar = document.querySelector<HTMLElement>(
               ".swal2-timer-progress-bar"
             );
-            if (bar) bar.style.backgroundColor = "#2e7d32";
+            if (bar) bar.style.backgroundColor = "#07e700";
           },
         });
 
         setTimeout(() => {
           window.location.href = "https://inventario.tssw.cl";
-        }, 8000);
+        }, 5500);
       } else {
         setGoogleError("Tu rol no tiene acceso autorizado.");
         setLoading(false);
@@ -136,7 +138,7 @@ const Login = () => {
         } else {
           setGoogleError("Ocurrió un error inesperado.");
         }
-      }, 1800);
+      }, 5000);
     }
   };
 
@@ -147,10 +149,11 @@ const Login = () => {
         title: "Error de inicio de sesión",
         html: `<p style="font-size:16px">${googleError}</p>`,
         showConfirmButton: false,
+        showCloseButton: true, // 👈 Agrega esto
         timer: 5000,
         timerProgressBar: true,
         background: "#ffffff",
-        color: "#b71c1c",
+        color: "#000000",
         width: "700px",
         customClass: {
           popup: "fixed-alert-height",
@@ -159,7 +162,7 @@ const Login = () => {
           const bar = document.querySelector<HTMLElement>(
             ".swal2-timer-progress-bar"
           );
-          if (bar) bar.style.backgroundColor = "#b71c1c";
+          if (bar) bar.style.backgroundColor = "#ff0000";
         },
       });
     }
@@ -185,6 +188,61 @@ const Login = () => {
         flex-direction: column;
         justify-content: center;
         align-items: center;
+        position: relative; /* ✅ NECESARIO para posicionar la X */
+        padding-top: 30px;   /* da espacio para la X sin que empuje el contenido */
+      }
+
+      .swal2-close {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        color: #444;
+        font-size: 1.5rem;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        z-index: 1000;
+      }
+      
+      .swal2-x-mark {
+        color: #ff0000; /* rojo claro */
+        border-color: #ff0000 !important;
+      }
+
+      .swal2-x-mark-line-left,
+      .swal2-x-mark-line-right {
+        background-color: #ff0000 !important; /* rojo claro */
+      }
+      /* Círculo del ícono de error */
+      .swal2-icon.swal2-error.swal2-icon-show {
+        border-color: #ff0000 !important;
+      }
+
+      .swal2-icon.swal2-error {
+        color: #ff0000;
+        border-color: #ff0000;
+      }
+
+      /* Círculo del icono de éxito */
+      .swal2-icon.swal2-success,
+      .swal2-icon.swal2-success.swal2-icon-show {
+        border-color: #07e700 !important;
+        background-color: transparent !important; /* asegúrate que no se rellene */
+      }
+
+      /* Línea animada del check verde */
+      .swal2-success-line-tip,
+      .swal2-success-line-long {
+        background-color: #07e700 !important;
+      }
+
+      /* Anillo, líneas y fix sin color (transparente o eliminadas) */
+      .swal2-success-ring,
+      .swal2-success-circular-line-left,
+      .swal2-success-circular-line-right,
+      .swal2-success-fix {
+        background-color: transparent !important;
+        border: none !important;
       }
     `;
     document.head.appendChild(style);
