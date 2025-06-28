@@ -7,8 +7,10 @@ import { auth, provider } from "../../../firebase";
 import logo from "@/styles/images/logo_barra_superior.png";
 import google_sign_in from "@/styles/images/logo_google.png";
 import Swal from "sweetalert2";
+import { useRouter } from "next/navigation";
 
 const Login = () => {
+  const route = useRouter();
   const [googleError, setGoogleError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -29,7 +31,7 @@ const Login = () => {
         return;
       }
 
-      if (!user.email.endsWith('@utem.cl')) {
+      if (!user.email.endsWith("@utem.cl")) {
         setTimeout(() => {
           setLoading(false);
           setGoogleError("Solo se permiten correos institucionales @utem.cl");
@@ -37,8 +39,7 @@ const Login = () => {
         return;
       }
 
-      // Verificar token en el backend
-      const response = await fetch(`http://localhost:8080/auth/verify`, { // Cambiar a la URL del backend en producción
+      const response = await fetch(`http://localhost:8080/auth/verify`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -50,9 +51,9 @@ const Login = () => {
         throw new Error("Error al verificar el token con el backend");
       }
 
-      const data = await response.json(); // { rol: 'Vendedor' | 'Administrador' | ... }
+      const data = await response.json(); // { rol: 'Administrador' | 'Vendedor' }
 
-      // Guarda info en localStorage
+      // Guardamos en localStorage
       localStorage.setItem(
         "user",
         JSON.stringify({
@@ -60,66 +61,40 @@ const Login = () => {
           email: user.email,
           uid: user.uid,
           photoURL: user.photoURL,
+          rol: data.rol,
         })
       );
 
-      // Manejo según rol
-      if (data.rol === "Vendedor") {
-        Swal.fire({
-          icon: "success",
-          title: `¡Bienvenido, ${user.displayName || "usuario"}!`,
-          text: "Inicio de sesión exitoso como Vendedor.",
-          showConfirmButton: false,
-          showCloseButton: true, // 👈 Agrega esto
-          timer: 5000,
-          timerProgressBar: true,
-          background: "#ffffff",
-          color: "#000000",
-          width: "700px",
-          customClass: {
-            popup: "fixed-alert-height",
-          },
-          didOpen: () => {
-            const bar = document.querySelector<HTMLElement>(
-              ".swal2-timer-progress-bar"
-            );
-            if (bar) bar.style.backgroundColor = "#07e700";
-          },
-        });
+      // Creamos la URL con los parámetros del usuario
+      const redirectURL = new URL("http://localhost:3001/admin/inicio");
+      redirectURL.searchParams.set("name", user.displayName || "");
+      redirectURL.searchParams.set("email", user.email || "");
+      redirectURL.searchParams.set("photoURL", user.photoURL || "");
+      redirectURL.searchParams.set("rol", data.rol);
 
-        setTimeout(() => {
-          window.location.href = "https://ventas.tssw.cl";
-        }, 5500);
-      } else if (data.rol === "Administrador") {
-        Swal.fire({
-          icon: "success",
-          title: `¡Bienvenido, ${user.displayName || "usuario"}!`,
-          text: "Inicio de sesión exitoso como Administrador.",
-          showConfirmButton: false,
-          showCloseButton: true, // 👈 Agrega esto
-          timer: 5000,
-          timerProgressBar: true,
-          background: "#ffffff",
-          color: "#000000",
-          width: "700px",
-          customClass: {
-            popup: "fixed-alert-height",
-          },
-          didOpen: () => {
-            const bar = document.querySelector<HTMLElement>(
-              ".swal2-timer-progress-bar"
-            );
-            if (bar) bar.style.backgroundColor = "#07e700";
-          },
-        });
+      Swal.fire({
+        icon: "success",
+        title: `¡Bienvenido, ${user.displayName || "usuario"}!`,
+        text: `Inicio de sesión exitoso como ${data.rol}.`,
+        showConfirmButton: false,
+        showCloseButton: true,
+        timer: 5000,
+        timerProgressBar: true,
+        background: "#ffffff",
+        color: "#000000",
+        width: "700px",
+        customClass: {
+          popup: "fixed-alert-height",
+        },
+        didOpen: () => {
+          const bar = document.querySelector<HTMLElement>(".swal2-timer-progress-bar");
+          if (bar) bar.style.backgroundColor = "#07e700";
+        },
+      });
 
-        setTimeout(() => {
-          window.location.href = "https://inventario.tssw.cl";
-        }, 5500);
-      } else {
-        setGoogleError("Tu rol no tiene acceso autorizado.");
-        setLoading(false);
-      }
+      setTimeout(() => {
+        route.push(redirectURL.toString());
+      }, 5500);
     } catch (error: unknown) {
       setTimeout(() => {
         setLoading(false);
@@ -149,7 +124,7 @@ const Login = () => {
         title: "Error de inicio de sesión",
         html: `<p style="font-size:16px">${googleError}</p>`,
         showConfirmButton: false,
-        showCloseButton: true, // 👈 Agrega esto
+        showCloseButton: true,
         timer: 5000,
         timerProgressBar: true,
         background: "#ffffff",
@@ -188,8 +163,8 @@ const Login = () => {
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        position: relative; /* ✅ NECESARIO para posicionar la X */
-        padding-top: 30px;   /* da espacio para la X sin que empuje el contenido */
+        position: relative;
+        padding-top: 30px;
       }
 
       .swal2-close {
@@ -203,17 +178,17 @@ const Login = () => {
         cursor: pointer;
         z-index: 1000;
       }
-      
+
       .swal2-x-mark {
-        color: #ff0000; /* rojo claro */
+        color: #ff0000;
         border-color: #ff0000 !important;
       }
 
       .swal2-x-mark-line-left,
       .swal2-x-mark-line-right {
-        background-color: #ff0000 !important; /* rojo claro */
+        background-color: #ff0000 !important;
       }
-      /* Círculo del ícono de error */
+
       .swal2-icon.swal2-error.swal2-icon-show {
         border-color: #ff0000 !important;
       }
@@ -223,20 +198,17 @@ const Login = () => {
         border-color: #ff0000;
       }
 
-      /* Círculo del icono de éxito */
       .swal2-icon.swal2-success,
       .swal2-icon.swal2-success.swal2-icon-show {
         border-color: #07e700 !important;
-        background-color: transparent !important; /* asegúrate que no se rellene */
+        background-color: transparent !important;
       }
 
-      /* Línea animada del check verde */
       .swal2-success-line-tip,
       .swal2-success-line-long {
         background-color: #07e700 !important;
       }
 
-      /* Anillo, líneas y fix sin color (transparente o eliminadas) */
       .swal2-success-ring,
       .swal2-success-circular-line-left,
       .swal2-success-circular-line-right,
