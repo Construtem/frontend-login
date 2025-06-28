@@ -65,13 +65,7 @@ const Login = () => {
         })
       );
 
-      // Creamos la URL con los parámetros del usuario
-      const redirectURL = new URL("http://localhost:3001/admin/inicio");
-      redirectURL.searchParams.set("name", user.displayName || "");
-      redirectURL.searchParams.set("email", user.email || "");
-      redirectURL.searchParams.set("photoURL", user.photoURL || "");
-      redirectURL.searchParams.set("rol", data.rol);
-
+      // Mostrar alerta y redirigir según el rol
       Swal.fire({
         icon: "success",
         title: `¡Bienvenido, ${user.displayName || "usuario"}!`,
@@ -93,7 +87,14 @@ const Login = () => {
       });
 
       setTimeout(() => {
-        route.push(redirectURL.toString());
+        if (data.rol === "Administrador") {
+          route.push("http://localhost:3001/admin/inicio");
+        } else if (data.rol === "Vendedor") {
+          window.location.href = "https://ventas.tssw.cl";
+        } else {
+          setGoogleError("Tu rol no tiene acceso autorizado.");
+          setLoading(false);
+        }
       }, 5500);
     } catch (error: unknown) {
       setTimeout(() => {
