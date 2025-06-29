@@ -7,8 +7,10 @@ import { auth, provider } from "../../../firebase";
 import logo from "@/styles/images/logo_barra_superior.png";
 import google_sign_in from "@/styles/images/logo_google.png";
 import Swal from "sweetalert2";
+import { useRouter } from "next/navigation";
 
 const Login = () => {
+  const route = useRouter();
   const [googleError, setGoogleError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -37,8 +39,7 @@ const Login = () => {
         return;
       }
 
-      // Verificar token en el backend
-      const response = await fetch(`https://api-login.tssw.cl/auth/verify`, {
+      const response = await fetch(`http://localhost:8080/auth/verify`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -50,9 +51,9 @@ const Login = () => {
         throw new Error("Error al verificar el token con el backend");
       }
 
-      const data = await response.json(); // { rol: 'Vendedor' | 'Administrador' | ... }
+      const data = await response.json(); // { rol: 'Administrador' | 'Vendedor' }
 
-      // Guarda info en localStorage
+      // Guardamos en localStorage
       localStorage.setItem(
         "user",
         JSON.stringify({
@@ -60,64 +61,41 @@ const Login = () => {
           email: user.email,
           uid: user.uid,
           photoURL: user.photoURL,
+          rol: data.rol,
         })
       );
 
-      // Manejo según rol
-      if (data.rol === "Vendedor") {
-        Swal.fire({
-          icon: "success",
-          title: `¡Bienvenido, ${user.displayName || "usuario"}!`,
-          text: "Inicio de sesión exitoso como Vendedor.",
-          showConfirmButton: false,
-          timer: 5000,
-          timerProgressBar: true,
-          background: "#ffffff",
-          color: "#2e7d32",
-          width: "700px",
-          customClass: {
-            popup: "fixed-alert-height",
-          },
-          didOpen: () => {
-            const bar = document.querySelector<HTMLElement>(
-              ".swal2-timer-progress-bar"
-            );
-            if (bar) bar.style.backgroundColor = "#2e7d32";
-          },
-        });
+      // Mostrar alerta y redirigir según el rol
+      Swal.fire({
+        icon: "success",
+        title: `¡Bienvenido, ${user.displayName || "usuario"}!`,
+        text: `Inicio de sesión exitoso como ${data.rol}.`,
+        showConfirmButton: false,
+        showCloseButton: true,
+        timer: 5000,
+        timerProgressBar: true,
+        background: "#ffffff",
+        color: "#000000",
+        width: "700px",
+        customClass: {
+          popup: "fixed-alert-height",
+        },
+        didOpen: () => {
+          const bar = document.querySelector<HTMLElement>(".swal2-timer-progress-bar");
+          if (bar) bar.style.backgroundColor = "#07e700";
+        },
+      });
 
-        setTimeout(() => {
+      setTimeout(() => {
+        if (data.rol === "Administrador") {
+          route.push("http://localhost:3001/admin/inicio");
+        } else if (data.rol === "Vendedor") {
           window.location.href = "https://ventas.tssw.cl";
-        }, 8000);
-      } else if (data.rol === "Administrador") {
-        Swal.fire({
-          icon: "success",
-          title: `¡Bienvenido, ${user.displayName || "usuario"}!`,
-          text: "Inicio de sesión exitoso como Administrador.",
-          showConfirmButton: false,
-          timer: 5000,
-          timerProgressBar: true,
-          background: "#ffffff",
-          color: "#2e7d32",
-          width: "700px",
-          customClass: {
-            popup: "fixed-alert-height",
-          },
-          didOpen: () => {
-            const bar = document.querySelector<HTMLElement>(
-              ".swal2-timer-progress-bar"
-            );
-            if (bar) bar.style.backgroundColor = "#2e7d32";
-          },
-        });
-
-        setTimeout(() => {
-          window.location.href = "https://inventario.tssw.cl";
-        }, 8000);
-      } else {
-        setGoogleError("Tu rol no tiene acceso autorizado.");
-        setLoading(false);
-      }
+        } else {
+          setGoogleError("Tu rol no tiene acceso autorizado.");
+          setLoading(false);
+        }
+      }, 5500);
     } catch (error: unknown) {
       setTimeout(() => {
         setLoading(false);
@@ -136,7 +114,7 @@ const Login = () => {
         } else {
           setGoogleError("Ocurrió un error inesperado.");
         }
-      }, 1800);
+      }, 5000);
     }
   };
 
@@ -147,10 +125,11 @@ const Login = () => {
         title: "Error de inicio de sesión",
         html: `<p style="font-size:16px">${googleError}</p>`,
         showConfirmButton: false,
+        showCloseButton: true,
         timer: 5000,
         timerProgressBar: true,
         background: "#ffffff",
-        color: "#b71c1c",
+        color: "#000000",
         width: "700px",
         customClass: {
           popup: "fixed-alert-height",
@@ -159,7 +138,7 @@ const Login = () => {
           const bar = document.querySelector<HTMLElement>(
             ".swal2-timer-progress-bar"
           );
-          if (bar) bar.style.backgroundColor = "#b71c1c";
+          if (bar) bar.style.backgroundColor = "#ff0000";
         },
       });
     }
@@ -185,6 +164,58 @@ const Login = () => {
         flex-direction: column;
         justify-content: center;
         align-items: center;
+        position: relative;
+        padding-top: 30px;
+      }
+
+      .swal2-close {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        color: #444;
+        font-size: 1.5rem;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        z-index: 1000;
+      }
+
+      .swal2-x-mark {
+        color: #ff0000;
+        border-color: #ff0000 !important;
+      }
+
+      .swal2-x-mark-line-left,
+      .swal2-x-mark-line-right {
+        background-color: #ff0000 !important;
+      }
+
+      .swal2-icon.swal2-error.swal2-icon-show {
+        border-color: #ff0000 !important;
+      }
+
+      .swal2-icon.swal2-error {
+        color: #ff0000;
+        border-color: #ff0000;
+      }
+
+      .swal2-icon.swal2-success,
+      .swal2-icon.swal2-success.swal2-icon-show {
+        border-color: #07e700 !important;
+        background-color: transparent !important;
+      }
+
+      .swal2-success-line-tip,
+      .swal2-success-line-long {
+        background-color: #07e700 !important;
+      }
+
+      .swal2-success-ring,
+      .swal2-success-circular-line-left,
+      .swal2-success-circular-line-right,
+      .swal2-success-fix {
+        background-color: transparent !important;
+        border: none !important;
       }
     `;
     document.head.appendChild(style);
