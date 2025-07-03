@@ -60,6 +60,8 @@ const Login = () => {
 
         if (data.rol === 'Vendedor') {
 
+          localStorage.setItem("firebase_token", token);  // Guardar el token en localStorage para enviarlo
+
           Swal.fire({
             icon: "success",
             title: `¡Bienvenido, ${user.displayName || "usuario"}!`,
@@ -84,6 +86,8 @@ const Login = () => {
             window.location.href = 'https://ventas.tssw.cl';
           }, 3000);
         } else if (data.rol === 'Administrador') {
+
+          localStorage.setItem("firebase_token", token);  // Guardar el token en localStorage para enviarlo
           
           Swal.fire({
             icon: "success",
