@@ -1,18 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { signInWithPopup } from "firebase/auth";
 import { auth, provider } from "../../../firebase";
 import logo from "@/styles/images/logo_barra_superior.png";
 import google_sign_in from "@/styles/images/logo_google.png";
 import Swal from "sweetalert2";
-import { useRouter } from "next/navigation";
 
 const Login = () => {
-  const route = useRouter();
   const [googleError, setGoogleError] = useState("");
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleGoogleLogin = async () => {
     setGoogleError("");
@@ -31,7 +31,7 @@ const Login = () => {
         return;
       }
 
-      if (!user.email.endsWith("@utem.cl")) {
+      if (!user.email.endsWith('@utem.cl')) {
         setTimeout(() => {
           setLoading(false);
           setGoogleError("Solo se permiten correos institucionales @utem.cl");
@@ -39,21 +39,87 @@ const Login = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:8080/auth/verify`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+      // Si el correo es válido, se procede a enviar el token al backend
+      if (user.email.endsWith('@utem.cl')) {
+        const response = await fetch(`https://api-login.tssw.cl/auth/verify`, {  // OJO cambiar URL al backend real
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
 
-      if (!response.ok) {
-        throw new Error("Error al verificar el token con el backend");
+        // Verificar si la respuesta es exitosa
+        if (!response.ok) {
+          throw new Error('Error al verificar el token con el backend');
+        }
+
+        // OJO que este rol debe ser creado en la bdd porcia, ahora mismo no funcionará xd
+        // Aqui el backend devuelve el rol del usuario
+        const data = await response.json(); // { rol: 'vendedor' | 'administrador' | ... }
+
+        if (data.rol === 'Vendedor') {
+          // Redirigir a la URL de ventas con el token, No funcionó con localstorage ya que no es mismo dominio en local
+          const URLventas = `https://ventas.tssw.cl/auth/callback?token=${token}`;
+          // Front inventario recibe url con token para enviarlo al backend        
+          Swal.fire({
+            icon: "success",
+            title: `¡Bienvenido, ${user.displayName || "usuario"}!`,
+            text: "Inicio de sesión exitoso como Administrador.",
+            showConfirmButton: false,
+            timer: 5000,
+            timerProgressBar: true,
+            background: "#ffffff",
+            color: "#2e7d32",
+            width: "700px",
+            customClass: {
+              popup: "fixed-alert-height",
+            },
+            didOpen: () => {
+              const bar = document.querySelector<HTMLElement>(
+                ".swal2-timer-progress-bar"
+              );
+              if (bar) bar.style.backgroundColor = "#2e7d32";
+            },
+          });
+          setTimeout(() => {
+            window.location.href = URLventas;  // Redirigir a ventas con el token
+          }, 3000);
+        } else if (data.rol === 'Administrador') {
+          // Redirigir a la URL de ventas con el token, No funcionó con localstorage ya que no es mismo dominio en local
+          const URLinventario = `https://inventario.tssw.cl/auth/callback?token=${token}`;
+          // Front inventario recibe url con token para enviarlo al backend
+          Swal.fire({
+            icon: "success",
+            title: `¡Bienvenido, ${user.displayName || "usuario"}!`,
+            text: "Inicio de sesión exitoso como Administrador.",
+            showConfirmButton: false,
+            timer: 5000,
+            timerProgressBar: true,
+            background: "#ffffff",
+            color: "#2e7d32",
+            width: "700px",
+            customClass: {
+              popup: "fixed-alert-height",
+            },
+            didOpen: () => {
+              const bar = document.querySelector<HTMLElement>(
+                ".swal2-timer-progress-bar"
+              );
+              if (bar) bar.style.backgroundColor = "#2e7d32";
+            },
+          });
+
+          setTimeout(() => {
+            window.location.href = URLinventario;  // Redirigir al inventario con el tokem
+          }, 3000);
+        } else {
+          setGoogleError("Tu rol no tiene acceso autorizado.");
+          setLoading(false);
+          return;
+        }
       }
 
-      const data = await response.json(); // { rol: 'Administrador' | 'Vendedor' }
-
-      // Guardamos en localStorage
       localStorage.setItem(
         "user",
         JSON.stringify({
@@ -61,44 +127,36 @@ const Login = () => {
           email: user.email,
           uid: user.uid,
           photoURL: user.photoURL,
-          rol: data.rol,
         })
       );
 
-      // Mostrar alerta y redirigir según el rol
-      Swal.fire({
-        icon: "success",
-        title: `¡Bienvenido, ${user.displayName || "usuario"}!`,
-        text: `Inicio de sesión exitoso como ${data.rol}.`,
-        showConfirmButton: false,
-        showCloseButton: true,
-        timer: 5000,
-        timerProgressBar: true,
-        background: "#ffffff",
-        color: "#000000",
-        width: "700px",
-        customClass: {
-          popup: "fixed-alert-height",
-        },
-        didOpen: () => {
-          const bar = document.querySelector<HTMLElement>(".swal2-timer-progress-bar");
-          if (bar) bar.style.backgroundColor = "#07e700";
-        },
-      });
-
       setTimeout(() => {
-        if (data.rol === "Administrador") {
-          route.push("http://localhost:3001/admin/inicio");
-        } else if (data.rol === "Vendedor") {
-          window.location.href = "https://ventas.tssw.cl";
-        } else {
-          setGoogleError("Tu rol no tiene acceso autorizado.");
-          setLoading(false);
-        }
-      }, 5500);
+        Swal.fire({ 
+          icon: "success",
+          title: "Inicio de sesión exitoso!",
+          showConfirmButton: false,
+          timer: 4800,
+          timerProgressBar: true,
+          background: "#ffffff",
+          color: "#2e7d32",
+          width: "700px",
+          customClass: {
+            popup: "fixed-alert-height",
+          },
+          didOpen: () => {
+            const bar = document.querySelector<HTMLElement>(".swal2-timer-progress-bar");
+            if (bar) bar.style.backgroundColor = "#2e7d32";
+          },
+        });
+
+        setTimeout(() => {
+          router.push("/maintenance");
+        }, 5000);
+      }, 1800);
     } catch (error: unknown) {
       setTimeout(() => {
         setLoading(false);
+
         if (
           typeof error === "object" &&
           error !== null &&
@@ -106,6 +164,7 @@ const Login = () => {
           typeof (error as { code: string }).code === "string"
         ) {
           const code = (error as { code: string }).code;
+
           if (code === "auth/popup-closed-by-user") {
             setGoogleError("El inicio de sesión fue cancelado.");
           } else {
@@ -114,7 +173,7 @@ const Login = () => {
         } else {
           setGoogleError("Ocurrió un error inesperado.");
         }
-      }, 5000);
+      }, 1800);
     }
   };
 
@@ -122,23 +181,20 @@ const Login = () => {
     if (googleError) {
       Swal.fire({
         icon: "error",
-        title: "Error de inicio de sesión",
-        html: `<p style="font-size:16px">${googleError}</p>`,
+        title: "Oops...",
+        text: googleError,
         showConfirmButton: false,
-        showCloseButton: true,
-        timer: 5000,
+        timer: 4800,
         timerProgressBar: true,
         background: "#ffffff",
-        color: "#000000",
+        color: "#b71c1c",
         width: "700px",
         customClass: {
           popup: "fixed-alert-height",
         },
         didOpen: () => {
-          const bar = document.querySelector<HTMLElement>(
-            ".swal2-timer-progress-bar"
-          );
-          if (bar) bar.style.backgroundColor = "#ff0000";
+          const bar = document.querySelector<HTMLElement>(".swal2-timer-progress-bar");
+          if (bar) bar.style.backgroundColor = "#b71c1c";
         },
       });
     }
@@ -164,58 +220,6 @@ const Login = () => {
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        position: relative;
-        padding-top: 30px;
-      }
-
-      .swal2-close {
-        position: absolute;
-        top: 10px;
-        right: 15px;
-        color: #444;
-        font-size: 1.5rem;
-        background: transparent;
-        border: none;
-        cursor: pointer;
-        z-index: 1000;
-      }
-
-      .swal2-x-mark {
-        color: #ff0000;
-        border-color: #ff0000 !important;
-      }
-
-      .swal2-x-mark-line-left,
-      .swal2-x-mark-line-right {
-        background-color: #ff0000 !important;
-      }
-
-      .swal2-icon.swal2-error.swal2-icon-show {
-        border-color: #ff0000 !important;
-      }
-
-      .swal2-icon.swal2-error {
-        color: #ff0000;
-        border-color: #ff0000;
-      }
-
-      .swal2-icon.swal2-success,
-      .swal2-icon.swal2-success.swal2-icon-show {
-        border-color: #07e700 !important;
-        background-color: transparent !important;
-      }
-
-      .swal2-success-line-tip,
-      .swal2-success-line-long {
-        background-color: #07e700 !important;
-      }
-
-      .swal2-success-ring,
-      .swal2-success-circular-line-left,
-      .swal2-success-circular-line-right,
-      .swal2-success-fix {
-        background-color: transparent !important;
-        border: none !important;
       }
     `;
     document.head.appendChild(style);
@@ -244,16 +248,8 @@ const Login = () => {
       <div style={styles.loginWrapper}>
         <div style={styles.loginBox}>
           <h2 style={styles.title}>Accede al sistema de gestión</h2>
-          <p
-            style={{
-              fontSize: "16px",
-              textAlign: "center",
-              color: "#444",
-              marginBottom: "20px",
-            }}
-          >
-            Ingresa con tu correo electrónico autorizado como administrador,
-            vendedor o usuario para acceder.
+          <p style={{ fontSize: "16px", textAlign: "center", color: "#444", marginBottom: "20px" }}>
+            Ingresa con tu correo electronico asociado como administrador, vendedor o usuario para acceder a nuestro sistema.
           </p>
 
           <button
