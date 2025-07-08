@@ -59,9 +59,9 @@ const Login = () => {
         const data = await response.json(); // { rol: 'vendedor' | 'administrador' | ... }
 
         if (data.rol === 'Vendedor') {
-
-          localStorage.setItem("firebase_token", token);  // Guardar el token en localStorage para enviarlo
-
+          // Redirigir a la URL de ventas con el token, No funcionó con localstorage ya que no es mismo dominio en local
+          const URLventas = `https://ventas.tssw.cl/auth/callback?token=${token}`;
+          // Front inventario recibe url con token para enviarlo al backend        
           Swal.fire({
             icon: "success",
             title: `¡Bienvenido, ${user.displayName || "usuario"}!`,
@@ -83,12 +83,12 @@ const Login = () => {
             },
           });
           setTimeout(() => {
-            window.location.href = 'https://ventas.tssw.cl';
+            window.location.href = URLventas;  // Redirigir a ventas con el token
           }, 3000);
         } else if (data.rol === 'Administrador') {
-
-          localStorage.setItem("firebase_token", token);  // Guardar el token en localStorage para enviarlo
-          
+          // Redirigir a la URL de ventas con el token, No funcionó con localstorage ya que no es mismo dominio en local
+          const URLinventario = `https://inventario.tssw.cl/auth/callback?token=${token}`;
+          // Front inventario recibe url con token para enviarlo al backend
           Swal.fire({
             icon: "success",
             title: `¡Bienvenido, ${user.displayName || "usuario"}!`,
@@ -111,7 +111,7 @@ const Login = () => {
           });
 
           setTimeout(() => {
-            window.location.href = 'https://inventario.tssw.cl';
+            window.location.href = URLinventario;  // Redirigir al inventario con el tokem
           }, 3000);
         } else {
           setGoogleError("Tu rol no tiene acceso autorizado.");
@@ -131,7 +131,7 @@ const Login = () => {
       );
 
       setTimeout(() => {
-        Swal.fire({   //Este deberia ir en (if (data.rol === 'vendedor') { ... } else if (data.rol === 'administrador') { ... })
+        Swal.fire({ 
           icon: "success",
           title: "Inicio de sesión exitoso!",
           showConfirmButton: false,
