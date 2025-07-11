@@ -13,6 +13,9 @@ const Login = () => {
   const [googleError, setGoogleError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const apiLoginUrl = process.env.NEXT_PUBLIC_API_LOGIN || "https://api-login.tssw.cl";
+  const frontInventarioUrl = process.env.NEXT_PUBLIC_FRONT_INVENTARIO || "https://inventario.tssw.cl";
+  const frontVentasUrl = process.env.NEXT_PUBLIC_FRONT_VENTAS || "https://ventas.tssw.cl";
 
   const handleGoogleLogin = async () => {
     setGoogleError("");
@@ -41,7 +44,7 @@ const Login = () => {
 
       // Si el correo es válido, se procede a enviar el token al backend
       if (user.email.endsWith('@utem.cl')) {
-        const response = await fetch(`https://api-login.tssw.cl/auth/verify`, {  // OJO cambiar URL al backend real
+        const response = await fetch(`${apiLoginUrl}/auth/verify`, {  // OJO cambiar URL al backend real
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -60,7 +63,7 @@ const Login = () => {
 
         if (data.rol === 'Vendedor') {
           // Redirigir a la URL de ventas con el token, No funcionó con localstorage ya que no es mismo dominio en local
-          const URLventas = `https://ventas.tssw.cl/auth/callback?token=${token}`;
+          const URLventas = `${frontVentasUrl}/auth/callback?token=${token}`;
           // Front inventario recibe url con token para enviarlo al backend        
           Swal.fire({
             icon: "success",
@@ -87,7 +90,7 @@ const Login = () => {
           }, 3000);
         } else if (data.rol === 'Administrador') {
           // Redirigir a la URL de ventas con el token, No funcionó con localstorage ya que no es mismo dominio en local
-          const URLinventario = `https://inventario.tssw.cl/auth/callback?token=${token}`;
+          const URLinventario = `${frontInventarioUrl}/auth/callback?token=${token}`;
           // Front inventario recibe url con token para enviarlo al backend
           Swal.fire({
             icon: "success",
