@@ -29,8 +29,8 @@ spec:
               memory: "128Mi"
               cpu: "100m"
             limits:
-              memory: "400Mi"
-              cpu: "1"
+              memory: "500Mi"
+              cpu: "3"
           #Descomentar si se necesita configurar el backend URL para ser usado por el frontend como variable de entorno
           #env:
             #- name: BACKEND_URL
