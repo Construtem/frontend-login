@@ -16,6 +16,7 @@ const Login = () => {
   const apiLoginUrl = process.env.NEXT_PUBLIC_API_LOGIN || "https://api-login.tssw.cl";
   const frontInventarioUrl = process.env.NEXT_PUBLIC_FRONT_INVENTARIO || "https://inventario.tssw.cl";
   const frontVentasUrl = process.env.NEXT_PUBLIC_FRONT_VENTAS || "https://ventas.tssw.cl";
+  console.log('Front Facturacion URL:', process.env.NEXT_PUBLIC_FRONT_FACTURACION);
 
   const handleGoogleLogin = async () => {
     setGoogleError("");
