@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { signInWithPopup } from "firebase/auth";
 import { auth, provider } from "../../../firebase";
@@ -12,7 +11,6 @@ import Swal from "sweetalert2";
 const Login = () => {
   const [googleError, setGoogleError] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
   const apiLoginUrl = process.env.NEXT_PUBLIC_API_LOGIN || "https://api-login.tssw.cl";
   const frontInventarioUrl = process.env.NEXT_PUBLIC_FRONT_INVENTARIO || "https://inventario.tssw.cl";
   const frontVentasUrl = process.env.NEXT_PUBLIC_FRONT_VENTAS || "https://ventas.tssw.cl";
@@ -277,41 +275,11 @@ const Login = () => {
           router.push("/maintenance");
         }, 5000);
       }, 1800);*/
-    } catch (error: any) {
+    } catch (error: unknown) {
       //setTimeout(() => {
-        const errorCode = error?.code;
-
-        if (errorCode === "auth/popup-closed-by-user") {
-          setGoogleError("El inicio de sesión fue cancelado.");
-          Swal.fire({
-            icon: "error",
-            title: "<span style='color: #000000'>Oops...</span>",
-            html: "<span style='color: #000000'>Se ha cancelado el inicio de sesión</span>",
-            showConfirmButton: false,
-            timer: 2000,
-            background: "#ffffff",
-            color: "#d32f2f",
-            confirmButtonColor: "#d32f2f"
-          });
-          setLoading(false);
-        } else {
-          setGoogleError("Error al iniciar sesión con Google.");
-          Swal.fire({
-            icon: "error",
-            title: "<span style='color: #000000'>Oops...</span>",
-            html: "<span style='color: #000000'>Ocurrió un error al iniciar sesión con Google</span>",
-            showConfirmButton: false,
-            timer: 2000,
-            background: "#ffffff",
-            color: "#d32f2f",
-            confirmButtonColor: "#d32f2f"
-          });
-          setLoading(false);
-        }
-        
-
-        // Esto creo que está mal xd
-        /* if (
+        setLoading(false);
+        console.error("Error during Google login:", error);
+        if (
           typeof error === "object" &&
           error !== null &&
           "code" in error &&
@@ -326,20 +294,20 @@ const Login = () => {
           }
         } else {
           setGoogleError("Ocurrió un error inesperado.");
-        } */
+        }
       //}, 1000);
     }
   };
 
   // Esto va vinculado a lo que se comentó arriba, no se usa
-  /* useEffect(() => {
+  useEffect(() => {
     if (googleError) {
       Swal.fire({
         icon: "error",
-        title: "Oops...",
+        title: "<span style='color: #000000'>Oops...</span>",
         text: googleError,
         showConfirmButton: false,
-        timer: 4800,
+        timer: 2000,
         timerProgressBar: true,
         background: "#ffffff",
         color: "#b71c1c",
@@ -353,7 +321,7 @@ const Login = () => {
         },
       });
     }
-  }, [googleError]); */
+  }, [googleError]);
 
   useEffect(() => {
     const style = document.createElement("style");
