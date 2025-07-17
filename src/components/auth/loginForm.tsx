@@ -68,10 +68,10 @@ const Login = () => {
           // Front inventario recibe url con token para enviarlo al backend        
           Swal.fire({
             icon: "success",
-            title: `¡Bienvenido, ${user.displayName || "usuario"}!`,
-            text: "Inicio de sesión exitoso como Administrador.",
+            title: `<b style='color: #000000'>¡Bienvenido, ${user.displayName || "usuario"}!</b>`,
+            html: "<span style='color: #000000'>Inicio de sesión exitoso como Vendedor.</span>",
             showConfirmButton: false,
-            timer: 5000,
+            timer: 3000,
             timerProgressBar: true,
             background: "#ffffff",
             color: "#2e7d32",
@@ -88,17 +88,17 @@ const Login = () => {
           });
           setTimeout(() => {
             window.location.href = URLventas;  // Redirigir a ventas con el token
-          }, 3000);
+          }, 1000);
         } else if (data.rol === 'Administrador') {
           // Redirigir a la URL de ventas con el token, No funcionó con localstorage ya que no es mismo dominio en local
           const URLinventario = `${frontInventarioUrl}/auth/callback?token=${token}`;
           // Front inventario recibe url con token para enviarlo al backend
           Swal.fire({
             icon: "success",
-            title: `¡Bienvenido, ${user.displayName || "usuario"}!`,
-            text: "Inicio de sesión exitoso como Administrador.",
+            title: `<b style='color: #000000'>¡Bienvenido, ${user.displayName || "usuario"}!</b>`,
+            html: "<span style='color: #000000'>Inicio de sesión exitoso como Administrador.</span>",
             showConfirmButton: false,
-            timer: 5000,
+            timer: 3000,
             timerProgressBar: true,
             background: "#ffffff",
             color: "#2e7d32",
@@ -116,9 +116,128 @@ const Login = () => {
 
           setTimeout(() => {
             window.location.href = URLinventario;  // Redirigir al inventario con el tokem
-          }, 3000);
+          }, 1000);
+        } else if (data.rol === 'Superadmin') {
+              Swal.fire({
+                icon: "question",
+                title: `<strong style='color: #000000'>¡Bienvenido, ${user.displayName || "usuario"}!</strong>`,
+                html: "<span style='color: #000000; font-size: 1.4rem'>¿A qué sistema deseas ingresar?</span>",
+                showCancelButton: true,
+                confirmButtonText: "Inventario",
+                cancelButtonText: "Ventas",
+                background: "#ffffff",
+                color: "#2e7d32",
+                width: "700px",
+                customClass: {
+                  popup: "fixed-alert-height",
+                  confirmButton: "swal-confirm-btn",
+                  cancelButton: "swal-cancel-btn",
+                },
+                didOpen: () => {
+                  /* const bar = document.querySelector<HTMLElement>(
+                    ".swal2-timer-progress-bar"
+                  );
+                  if (bar) bar.style.backgroundColor = "#2e7d32"; */
+                  const confirmBtn = Swal.getConfirmButton();
+                  const cancelBtn = Swal.getCancelButton();
+                  const icon = document.querySelector<HTMLElement>('.swal2-icon');
+
+                  if (confirmBtn) {
+                    confirmBtn.style.backgroundColor = "#0149ad";
+                    confirmBtn.style.color = "white";
+                    confirmBtn.style.transition = "background-color 0.3s ease";
+                    confirmBtn.onmouseenter = () => {
+                      confirmBtn.style.backgroundColor = "#00265C"; // Cambiar color al pasar el mouse
+                    };
+                    confirmBtn.onmouseleave = () => {
+                      confirmBtn.style.backgroundColor = "#0149ad";
+                    };
+                  }
+                
+                  if (cancelBtn) {
+                    cancelBtn.style.backgroundColor = "#0149ad";
+                    cancelBtn.style.color = "white";
+                    cancelBtn.style.transition = "background-color 0.3s ease";
+                    cancelBtn.onmouseenter = () => {
+                      cancelBtn.style.backgroundColor = "#00265C"; // Cambiar color al pasar el mouse
+                    };
+                    cancelBtn.onmouseleave = () => {
+                      cancelBtn.style.backgroundColor = "#0149ad";
+                    };
+                  }
+                
+                  if (icon) {
+                    icon.style.color = "#1565c0"; // Cambiar color del ícono (logo)
+                  }
+                },
+              }).then((result) => {
+                if (result.isConfirmed) {   //Superadmin ingresa como administrador
+                  const URLinventario = `${frontInventarioUrl}/auth/callback?token=${token}`;
+                  // Front inventario recibe url con token para enviarlo al backend
+                  Swal.fire({
+                    icon: "success",
+                    title: `<b style='color: #000000'>¡Ingresando al sistema de Inventario!</b>`,
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true,
+                    background: "#ffffff",
+                    color: "#2e7d32",
+                    width: "700px",
+                    customClass: {
+                      popup: "fixed-alert-height",
+                    },
+                    didOpen: () => {
+                      const bar = document.querySelector<HTMLElement>(
+                        ".swal2-timer-progress-bar"
+                      );
+                      if (bar) bar.style.backgroundColor = "#2e7d32";
+                    },
+                  });
+                
+                  setTimeout(() => {
+                    window.location.href = URLinventario;  // Redirigir al inventario con el tokem
+                  }, 1000);
+                } else if (result.dismiss === Swal.DismissReason.cancel) {  //Superadmin ingresa como vendedor
+                  // Redirigir a la URL de ventas con el token, No funcionó con localstorage ya que no es mismo dominio en local
+                  const URLventas = `${frontVentasUrl}/auth/callback?token=${token}`;
+                  // Front inventario recibe url con token para enviarlo al backend        
+                  Swal.fire({
+                    icon: "success",
+                    title: `<b style='color: #000000'>¡Ingresando al sistema de Ventas!</b>`,
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true,
+                    background: "#ffffff",
+                    color: "#2e7d32",
+                    width: "700px",
+                    customClass: {
+                      popup: "fixed-alert-height",
+                    },
+                    didOpen: () => {
+                      const bar = document.querySelector<HTMLElement>(
+                        ".swal2-timer-progress-bar"
+                      );
+                      if (bar) bar.style.backgroundColor = "#2e7d32";
+                    },
+                  });
+                  setTimeout(() => {
+                    window.location.href = URLventas;  // Redirigir a ventas con el token
+                  }, 1000);
+                } else if (Swal.DismissReason.backdrop){
+                  Swal.fire({
+                    icon: "error",
+                    title: "<span style='color: #000000'>Operación cancelada</span>",
+                    html: "<span style='color: #000000'>No se ha seleccionado ningún sistema.</span>",
+                    showConfirmButton: true,
+                    background: "#ffffff",
+                    color: "#d32f2f",
+                    confirmButtonColor: "#d32f2f"
+                  });
+                  setLoading(false);
+                }
+              });
         } else {
-          setGoogleError("Tu rol no tiene acceso autorizado.");
+          setGoogleError("Tu usuario no tiene acceso autorizado.");
           setLoading(false);
           return;
         }
@@ -134,7 +253,8 @@ const Login = () => {
         })
       );
 
-      setTimeout(() => {
+      // Mensaje de exito de sesión exitoso
+      /*setTimeout(() => {
         Swal.fire({ 
           icon: "success",
           title: "Inicio de sesión exitoso!",
@@ -156,12 +276,42 @@ const Login = () => {
         setTimeout(() => {
           router.push("/maintenance");
         }, 5000);
-      }, 1800);
-    } catch (error: unknown) {
-      setTimeout(() => {
-        setLoading(false);
+      }, 1800);*/
+    } catch (error: any) {
+      //setTimeout(() => {
+        const errorCode = error?.code;
 
-        if (
+        if (errorCode === "auth/popup-closed-by-user") {
+          setGoogleError("El inicio de sesión fue cancelado.");
+          Swal.fire({
+            icon: "error",
+            title: "<span style='color: #000000'>Oops...</span>",
+            html: "<span style='color: #000000'>Se ha cancelado el inicio de sesión</span>",
+            showConfirmButton: false,
+            timer: 2000,
+            background: "#ffffff",
+            color: "#d32f2f",
+            confirmButtonColor: "#d32f2f"
+          });
+          setLoading(false);
+        } else {
+          setGoogleError("Error al iniciar sesión con Google.");
+          Swal.fire({
+            icon: "error",
+            title: "<span style='color: #000000'>Oops...</span>",
+            html: "<span style='color: #000000'>Ocurrió un error al iniciar sesión con Google</span>",
+            showConfirmButton: false,
+            timer: 2000,
+            background: "#ffffff",
+            color: "#d32f2f",
+            confirmButtonColor: "#d32f2f"
+          });
+          setLoading(false);
+        }
+        
+
+        // Esto creo que está mal xd
+        /* if (
           typeof error === "object" &&
           error !== null &&
           "code" in error &&
@@ -176,12 +326,13 @@ const Login = () => {
           }
         } else {
           setGoogleError("Ocurrió un error inesperado.");
-        }
-      }, 1800);
+        } */
+      //}, 1000);
     }
   };
 
-  useEffect(() => {
+  // Esto va vinculado a lo que se comentó arriba, no se usa
+  /* useEffect(() => {
     if (googleError) {
       Swal.fire({
         icon: "error",
@@ -202,7 +353,7 @@ const Login = () => {
         },
       });
     }
-  }, [googleError]);
+  }, [googleError]); */
 
   useEffect(() => {
     const style = document.createElement("style");
@@ -240,7 +391,7 @@ const Login = () => {
             <div style={styles.spinner}></div>
           </div>
           <div style={styles.logoBox}>
-            <Image src={logo} alt="Ferretería UTEM" style={styles.logo} />
+            <Image src={logo} alt="Construtem" style={styles.logo} />
           </div>
         </div>
       </div>
@@ -251,9 +402,9 @@ const Login = () => {
     <div style={styles.pageBackground}>
       <div style={styles.loginWrapper}>
         <div style={styles.loginBox}>
-          <h2 style={styles.title}>Accede al sistema de gestión</h2>
+          <h2 style={styles.title}>Accede al sistema Construtem</h2>
           <p style={{ fontSize: "16px", textAlign: "center", color: "#444", marginBottom: "20px" }}>
-            Ingresa con tu correo electronico asociado como administrador, vendedor o usuario para acceder a nuestro sistema.
+            Ingresa con tu correo electronico institucional para acceder al sistema correspondiente a tu rol de Construtem.
           </p>
 
           <button
