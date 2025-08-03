@@ -1,0 +1,14 @@
+# Este archivo define el servicio de login en producción.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: front-login-service
+spec:
+  type: ClusterIP
+  selector:
+    app: front-login
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000

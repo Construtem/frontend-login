@@ -1,9 +1,10 @@
 # PENDIENTE: utilizar secrets para id del proyecto y env para no hardcodear tanta cosa xd
+# PENDIENTE: Cambiar nombres de cluster y proyecto a los de produccion
 name: CI/CD Frontend
 
 on:
   push:
-    branches: [develop]
+    branches: [main]
 
 jobs:
   ci-validacion:
@@ -49,13 +50,7 @@ jobs:
         run: gcloud auth configure-docker southamerica-east1-docker.pkg.dev
 
       - name: Construir imagen Docker
-        run: |
-          docker build \
-            --build-arg NEXT_PUBLIC_API_LOGIN=${{ secrets.NEXT_PUBLIC_API_LOGIN }} \
-            --build-arg NEXT_PUBLIC_FRONT_INVENTARIO=${{ secrets.NEXT_PUBLIC_FRONT_INVENTARIO }} \
-            --build-arg NEXT_PUBLIC_FRONT_VENTAS=${{ secrets.NEXT_PUBLIC_FRONT_VENTAS }} \
-            --build-arg NEXT_PUBLIC_FRONT_FACTURACION=${{ secrets.NEXT_PUBLIC_FRONT_FACTURACION }} \
-            -t southamerica-east1-docker.pkg.dev/construtem/microservicios-construtem/front-login:latest .
+        run: docker build -t southamerica-east1-docker.pkg.dev/construtem/microservicios-construtem/front-login:latest .
 
       - name: Subir imagen a Artifact Registry
         run: docker push southamerica-east1-docker.pkg.dev/construtem/microservicios-construtem/front-login:latest
@@ -82,7 +77,7 @@ jobs:
           project_id: construtem
 
       - name: Aplicar manifiestos de Kubernetes
-        run: kubectl apply -f k8s/testing/
+        run: kubectl apply -f k8s/produccion/
 
       - name: Verificar estado de pods
         run: kubectl get pods -n default 
